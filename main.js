@@ -1,8 +1,12 @@
+"use strict";
+
 const electron = require('electron')
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
+
+const {globalShortcut} = require('electron');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -10,13 +14,12 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
+  mainWindow = new BrowserWindow({width: 1100, height: 600})
 
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`)
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -27,10 +30,30 @@ function createWindow () {
   })
 }
 
+const exec = require('child_process').exec;
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', function(){
+    createWindow()
+
+    const ret = globalShortcut.register('F12', () => {
+      console.log('F12 is pressed');
+
+      exec('open -a "/Applications/Google Chrome.app"', (error, stdout, stderr) => {
+      });
+
+    });
+
+    if (!ret) {
+      console.log('registration failed');
+    }
+
+    // Check whether a shortcut is registered.
+    console.log(globalShortcut.isRegistered('CommandOrControl+X'));
+
+  })
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {

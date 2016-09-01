@@ -2,18 +2,330 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>hotitext</title>
+    <style>
+    body { font-family: sans-serif;
+           color:#444444;
+    }
+    a:link {color: #124488;text-decoration: none; }
+    a:visited {color: #124488;text-decoration: none;}
+    a:hover {color: #124488;text-decoration: underline;}
+
+    .tFile {  }
+    .tDir { font-weight:bold; font-color:DodgerBlue;}
+    .tLink { fonct-color:pink;}
+
+
+    .s150 {font-size:150%;}
+    .s120 {font-size:120%;}
+
+    .gray {color:gray;}
+    .silver {color:silver;}
+    .red {color:red;}
+    .crimson {color:crimson;}
+    .pink {color:pink;}
+
+    .bold {font-weight:bold;}
+
+    </style>
   </head>
   <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using node <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
-  </body>
 
+    <div style="border-bottom:solid 1px silver">
+        <a onClick="goDir(userhome_path)" id="username" class="s120 bold" href="javascript:void(0)" >home</a>
+            <a onClick="goDir(userhome_path +'/Desktop')" href="javascript:void(0)" >desktop</a>
+            <a onClick="goDir(userhome_path +'/Documents')" href="javascript:void(0)" >doc</a>
+            <a onClick="goDir(userhome_path +'/Downloads')" href="javascript:void(0)" >download</a>
+            <a onClick="goDir(userhome_path +'/.Trash')" href="javascript:void(0)" >trash</a>
+
+        <a onClick="goDir('/Applications')" class="s120 bold" href="javascript:void(0)" >Applications</a>
+        <a onClick="goDir('/Volumes')" class="s120 bold" href="javascript:void(0)" >Volumes</a>
+        <a onClick="goDir('/etc')" class="s120 bold" href="javascript:void(0)" >etc</a>
+        <a onClick="goDir('/var')" class="s120 bold" href="javascript:void(0)" >var</a>
+
+
+        <a onClick="termOpen(current_path)" href="javascript:void(0)"><span class="crimson">Term</span></a>
+        <a onClick="$('#shortcut').slideToggle(10)" href="javascript:void(0)"><span class="crimson">Shortcut</span></a>
+
+        <div id="shortcut" style="display:none; margin:10px;" >
+          <!--Com H : go home directory <br/>  com h は appli をhide -->
+          Com UP : go upper directory <br/>
+          Com N : create new file or directory <br/>
+        </div>
+
+    </div>
+
+    <span id="current" class="bold s150" ></span>
+    <a onClick="setBookmark(current_path)" href="javascript:void(0)">bm</a>
+    <a onClick="openFinder(current_path)" href="javascript:void(0)">finder</a>
+    <br/>
+
+
+    <span id="current_action" class="crimson">
+
+      <a onClick="$('#new_action').slideToggle(30)" href="javascript:void(0)">new</a>
+
+
+    </span>
+    <input id="filter" type="text" class="" size=15 placeholder="filter">
+    <input id="grep_filter" type="text" class="" size=15 placeholder="grep">
+    <span id="filter_shell" ></span>
+
+    <div id="new_action"  style="display:none;">
+        <a id="new_file" onClick="makeFile('aaaa.txt' )" href="javascript:void(0);" class="s150">file </a>
+        <a id="new_dir" onClick="makeDir( 'dir1' )" href="javascript:void(0);"  class="s150">folder</a>
+    </div>
+
+
+    <div style="margin-left:20px; margin-top:10px;">
+
+
+
+        <table><tr>
+        <td id="files1" path="" width=50% valign=top >file1</td>
+        <td id="files2" path="" width=50% valign=top   >files/dirs in child dirs / depth 3</td>
+      </tr></table>
+    </div>
+
+    <br/>
+    history<hr/>
+    <span id="history" path=""></span>
+
+    <br/>
+    bookmark
+    <hr/>
+    <span id="bookmark" path=""></span>
+  </body>
   <script>
+
+
+  // Open the DevTools.
+  mainWindow.webContents.openDevTools()
+
+
     // You can also require other files to run in this process
     require('./renderer.js')
+    require('./functions.js')
+
+    const exec = require('child_process').exec;
+    const BrowserWindow = require('electron').remote.BrowserWindow // windowオブジェクト
+    const path = require('path')
+    const fs = require('fs')
+
+
+    $("#filter").keyup((e) =>{ showFilelist(current_path , $('#filter').val()) })
+    var username = ""
+    var userhome_path = ""
+    var current_path = ""
+    var bookmarks_ary= []
+    var history_ary = []
+    var bookmark_ary = []
+
+    osrun("whoami",function(name){
+        username = name.trim()
+        $('#username').html(username)
+    })
+    osrun("echo $HOME",function(path){
+        userhome_path = path.trim()
+        current_path = userhome_path
+        goDir(current_path)
+    })
+
+
+    //ショートカット
+    $(document).on('keydown', function(e) {
+        console.log("key metakey shiftkey ctrlkey" , e.which, e.metaKey, e.shiftKey, e.ctrlKey )
+
+        if (e.which ==38 && e.metaKey) {  //  com up
+           current_path = current_path.replace(/(.*)(\/.*?$)/,'$1')
+           if (!current_path) current_path="/"
+           goDir(current_path)
+        }
+        if (e.which ==72 && e.metaKey) {  // com H
+           goDir(userhome_path)
+        }
+        if (e.which ==78 && e.metaKey) {  // com N
+           $('#new_action').slideDown(10)
+           $('#new_file').focus()
+
+        }
+
+        // if (e.which ==67 ) {  // C キーでchromeオープン
+        //   osrun('open -a "/Applications/Google Chrome.app"')
+        // }
+    })
+
+    setHistory=function(){
+      var out =""
+      for (var ind in history_ary ) out += '<a href="javascript:void(0)" onClick="setCurrentPath(\'' + history_ary[ind] + '\')">' +history_ary[ind] + '</a><br/>'
+      $('#history').html( out)
+
+    }
+    setBookmark = function(path){
+      path = path.replace(/\/\//,'/') // ルートからのフォルダ選択でスラッシュが重なる問題の対処
+      bookmark_ary[path] = path
+      var out =""
+      for (var ind in bookmark_ary ) out += '<a href="javascript:void(0)" onClick="setCurrentPath(\'' + history_ary[ind] + '\')">' +history_ary[ind] + '</a><br/>'
+      $('#bookmark').html( out )
+    }
+
+    setCurrentPath = function(path){
+      path = path.replace(/\/\//,'/') // ルートからのフォルダ選択でスラッシュが重なる問題の対処
+      history_ary[path] = path
+      setHistory()
+      $('#filter').val('')
+
+      console.log(history_ary)
+      ary_path = path.trim().split(/\//)
+
+        var str_link = ""
+        var c_path = ""
+        //階層ごとにリンク
+        for (var ind in ary_path){
+            if (ind == 0 ) continue
+            c_path += "/" + ary_path[ind]
+            str_link += '<a href="javascript:setCurrentPath(\'' + c_path + '\')">' +  sBlue( "/" +ary_path[ind] ) + '</a>'
+        }
+        $('#current').html( str_link )
+
+        current_path = c_path
+        showFilelist(current_path,$('#filter').val())
+        $("#filter").focus()
+
+    }
+
+    goDir = function(path){
+      if ( path == undefined) return;
+      setCurrentPath(path)
+    }
+
+    makeFile= function(filename){
+        var cmd = "echo '' > " + current_path + "/" + filename
+        osrun(cmd ,function(){
+          console.log(filename)
+          goDir(current_path)
+        })
+    }
+    makeDir =function(dirname){
+        var cmd = "mkdir " + current_path + "/" + dirname
+        osrun(cmd ,function(){
+          console.log(dirname)
+          goDir(current_path)
+        })
+    }
+
+    openFinder = function(path){
+      osrun("open " + path,null)
+    }
+
+    termOpen = function(path){
+      console.log(path)
+      osrun("open -a /Applications/iTerm.app",null)
+    }
+
+    showFilelist = function(dir,filter){
+      console.log(dir,filter)
+
+      var shell = "ls -A '" + dir + "'"
+      if (filter) shell += " | egrep -i '" + filter + "'"
+
+      osrun(shell,
+        function(filelist_str){
+          var filelist_ary = filelist_str.trim().split(/\n/)
+          var node_ct = { file:0, dir:0 };
+          var ext_ct = { };
+          var files_ret = [];
+
+          for (var ind in filelist_ary){
+              files_ret[ind] = []
+              files_ret[ind].fullpath = dir + "/" + filelist_ary[ind]
+              files_ret[ind].stat = fs.statSync(files_ret[ind].fullpath)
+              files_ret[ind].filename = filelist_ary[ind]
+
+              if (files_ret[ind].stat.isDirectory()) {
+                  node_ct.dir++
+              }
+              files_ret[ind].ext = ""
+              if (files_ret[ind].stat.isFile()) {
+                  node_ct.file++
+
+                  if (files_ret[ind].filename.substr(0,1) != ".") {
+                    files_ret[ind].ext = files_ret[ind].filename.replace(/(\?.*)/,"").replace(/.*\./,"") // うしろの?以降をとって、そのえとピリオド以前を除去
+                  }
+                  if (ext_ct[ files_ret[ind].ext ]) {
+                    ext_ct[ files_ret[ind].ext ]++
+                  }else{
+                    ext_ct[ files_ret[ind].ext ]=1
+                  }
+              }
+          }
+          //listThumb(shell,filter,files_ret,node_ct,ext_ct)
+          listInner(shell,filter,files_ret,node_ct,ext_ct)
+          listDetail(shell,filter,files_ret,node_ct,ext_ct)
+          listSimple(shell,filter,files_ret,node_ct,ext_ct)
+        }
+      )
+    }
+
+    listDetail = function(shell,filter,files_ret,node_ct,ext_ct) {}
+    listSimple = function(shell,filter,files_ret,node_ct,ext_ct) {}
+    listThumb = function(shell,filter,files_ret,node_ct,ext_ct) {
+      var filelist_outstr =""
+      for (var ind in files_ret){
+        var filename_disp = files_ret[ind].filename
+        if (filter) filename_disp = files_ret[ind].filename.replace(new RegExp( filter , 'gi'),sRed(filter))
+
+        if (files_ret[ind].stat.isDirectory()) {
+
+        }
+        var ext = ""
+        if (files_ret[ind].stat.isFile()) {
+            filename_disp = ""
+        }
+        if ( files_ret[ind].ext.match(/(jpg|jpeg|png|gif|tiff)/i) ) filelist_outstr += '<img  height=70 src="file://' + files_ret[ind].fullpath + '"/> &nbsp;'
+      }
+      console.log(ext_ct)
+
+      $('#filter_shell').html(
+          sSilver(shell) + " " + sCrimson(files_ret.length) +
+          sSilver(' file' + sGray(node_ct.file) + ' dir' + sGray(node_ct.dir)) + " ")
+      $('#files1').html( '<br/>' + filelist_outstr )
+    }
+
+    listInner = function(shell,filter,files_ret,node_ct,ext_ct) {
+      var filelist_outstr =""
+      for (var ind in files_ret){
+        var filename_disp = files_ret[ind].filename
+        if (filter) filename_disp = files_ret[ind].filename.replace(new RegExp( filter , 'gi'),sRed(filter))
+
+        if (files_ret[ind].stat.isDirectory()) {
+            filename_disp = '<a onClick="goDir(current_path + \'' + '/' + files_ret[ind].filename + '\')" href="javascript:void(0);">' + sBold(sBlue(filename_disp)) + '</a> ' +
+                            sSilver(' + ')
+        }
+        var ext = ""
+        if (files_ret[ind].stat.isFile()) {
+            filename_disp = filename_disp
+        }
+
+        filelist_outstr += filename_disp + '<br/>'
+
+        if (files_ret[ind].stat.isFile()) {
+            if ( files_ret[ind].ext.match(/(jpg|jpeg|png|gif|tiff)/i) ) filelist_outstr += '<img  height=70 src="file://' + files_ret[ind].fullpath + '"/><br/>'
+            if ( files_ret[ind].ext.match(/(html|htm|js|coffee|php|rb|py|txt|xml|yaml|webloc|cpp|h|json|lua|plist|log|md)$/i)
+                || files_ret[ind].filename.substr(0,1) == "." ) {
+                var filetext = fs.readFileSync(files_ret[ind].fullpath,'utf-8').substr(0,500)
+                var htmlencoded = $('<div/>').text(filetext).html()
+                filelist_outstr += '<div style="margin-left:10px; margin-top:3px; font-size:70%;" >' + sSilver(htmlencoded) + '</div>'
+            }
+        }
+      }
+
+      $('#filter_shell').html(
+          sSilver(shell) + " " + sCrimson(files_ret.length) +
+          sSilver(' file' + sGray(node_ct.file) + ' dir' + sGray(node_ct.dir)) + " ")
+      $('#files1').html( filelist_outstr )
+    }
+
+
   </script>
 </html>
