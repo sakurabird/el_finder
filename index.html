@@ -31,13 +31,26 @@
         <a onClick="goDir('/var')" class="s120 bold" href="javascript:void(0)" >var</a>
 
 
-        <a onClick="termOpen(_G.current_path)" href="javascript:void(0)"><span class="crimson">Term</span></a>
+        <a onClick="termOpen(_G.current_path)" href="javascript:void(0)"><span class="crimson">Terminal</span></a>
         <a onClick="$('#shortcut').slideToggle(10)" href="javascript:void(0)"><span class="crimson">Shortcut</span></a>
+        <a onClick="$('#bookmark').slideToggle(10)" href="javascript:void(0)"><span class="crimson">Bookmark</span></a>
+        <a onClick="$('#history').slideToggle(10)" href="javascript:void(0)"><span class="crimson">History</span></a>
 
         <div id="shortcut" style="display:none; margin:10px;" >
           <!--Com H : go home directory <br/>  com h は appli をhide -->
           Com UP : go upper directory <br/>
           Com N : create new file or directory <br/>
+          Com B : toggle Bookmark <br/>
+        </div>
+
+        <div id="bookmark" class="hide"></span>
+            <input id="filter_bookmark" type="text" class="" size=15 placeholder="filter">
+            
+            <span id="bookmark_list" path=""></span>
+        </div>
+        <div id="history" class="hide"></span>
+            history<hr/>
+            <span id="history_list" path=""></span>
         </div>
 
     </div>
@@ -50,10 +63,7 @@
 
 
     <span id="current_action" class="crimson">
-
       <a onClick="$('#new_action').slideToggle(30)" href="javascript:void(0)">new</a>
-
-
     </span>
     <input id="filter" type="text" class="" size=15 placeholder="filter">
     <input id="grep_filter" type="text" class="" size=15 placeholder="grep">
@@ -75,14 +85,8 @@
       </tr></table>
     </div>
 
-    <br/>
-    history<hr/>
-    <span id="history_list" path=""></span>
 
-    <br/>
-    bookmark
-    <hr/>
-    <span id="bookmark_list" path=""></span>
+
   </body>
   <script>
 

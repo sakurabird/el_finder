@@ -23,15 +23,20 @@ setBookmark = function(path){
 }
 
 showBookmarkList = function(){
-  var out =""
+  var out ="<table>"
   for (var ind in _G.bookmark_ary ) {
-    out += '<span class="bm_go btn" bmkey="'+ind+'">' +
+    out += '<tr>' + 
+        '<td><span class="bm_go btn" bmkey="'+ind+'">' +
         _G.bookmark_ary[ind] + '</span> ' + 
+        '</td><td>' + 
         sSilver(s80(ind)) + 
+        '</td><td>' +
         '<span class="bm_del btn" bmkey="'+ind+'">del</span> '+
-        '<span class="bl_edit btn" bmkey="' + ind + '">edit</span>' + '<br/>'
+        '</td><td>' + 
+        '<span class="bl_edit btn" bmkey="' + ind + '">edit</span>' + 
+        '</td></tr>'
   }
-  $('#bookmark_list').html( out )
+  $('#bookmark_list').html( out + '</table>' )
 
 }
 

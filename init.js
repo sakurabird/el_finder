@@ -40,6 +40,13 @@ $(document).on('click','.bm_go', function(e) {
 
 })
 
+$('#filter_bookmark').on('keydown',function(e){
+    if (e.which ==13) {	
+    //filterBookmark()
+	}
+})
+
+
 //ショートカット
 $(document).on('keydown', function(e) {
     console.log("key metakey shiftkey ctrlkey" , e.which, e.metaKey, e.shiftKey, e.ctrlKey )
@@ -55,9 +62,11 @@ $(document).on('keydown', function(e) {
     if (e.which ==78 && e.metaKey) {  // com N
        $('#new_action').slideDown(10)
        $('#new_file').focus()
-
     }
 
+    if (e.which ==66 && e.metaKey) {  // com B    
+	    $('#bookmark').slideToggle(10)
+	}
     // if (e.which ==67 ) {  // C キーでchromeオープン
     //   osrun('open -a "/Applications/Google Chrome.app"')
     // }
