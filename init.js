@@ -25,23 +25,22 @@ if (!_G.bookmark_ary) _G.bookmark_ary = {}
 
 showBookmarkList()
 
-//ショートカット
+//ブックマークイベント
 $(document).on('click','.bm_del', function(e) {
 	console.log('bl_del' , e.target)
 	delete　_G.bookmark_ary[$(e.target).attr('bmkey')]
 	showBookmarkList()
 })
-
 $(document).on('click','.bm_edit', function(e) {
 	console.log('bm_edit' , e.target)
 })
-
 $(document).on('click','.bm_go', function(e) {
 	console.log('bm_go' , e.target)
 	setCurrentPath($(e.target).attr('bmkey'))
 
 })
 
+//ショートカット
 $(document).on('keydown', function(e) {
     console.log("key metakey shiftkey ctrlkey" , e.which, e.metaKey, e.shiftKey, e.ctrlKey )
 
