@@ -9,8 +9,15 @@
     body { font-family: sans-serif;
            color:#444444;}
 
-    .tFile {  }
+    .link { color:#444444;  }
+    .link:hover { color:#666666; }
+
+    .tFile {}
+    .tFile:hover {color:#666666;}
+
     .tDir { font-weight:bold; font-color:DodgerBlue;}
+    .tDir:hover { font-weight:bold; font-color:Blue;}
+
     .tLink { fonct-color:pink;}
     .crimson {color:crimson;}
 
@@ -46,7 +53,7 @@
         </div>
 
         <div id="bookmark" class="hide"></span>
-            <input id="filter_bookmark" type="text" class="" size=15 placeholder="filter">
+            <input id="filter_bookmark" type="text" class="" size=15 placeholder="filter bookmark">
             
             <span id="bookmark_list" path=""></span>
         </div>
@@ -66,7 +73,7 @@
     </span>
 
     <span  class="crimson">
-      <a onClick="$('#command').slideToggle(10)" href="javascript:void(0)">command</a>
+      <a onClick="$('#command').slideToggle(10); $('#command_str').focus()" href="javascript:void(0)">command</a>
     </span>
 
 
@@ -83,9 +90,7 @@
     </div>
 
     <div id="command" class="hide">
-        <input id="command_str" type="text" class="" size="60" onKeyUp="
-        osRunOut($(this).val(),'command_out','replace')
-        " placeholder="command_str">
+        <input id="command_str" type="text" class="" size="60" placeholder="command_str">
         <div id="command_out" ></div>
     </div>
 
@@ -95,19 +100,25 @@
     dir<span id="dir_count"></span>
 
     <div style="margin-left:20px; margin-top:10px;">
-
         <table><tr>
-        <td id="file_list" path="" width=50% valign=top >
+            <td id="file_list" path="" valign=top nowrap >
 
-        </td>
-        <td path="" width=50% valign=top   >
-          files/dirs in child dirs / depth 3
-          <div id="files_child"></div>
+            </td>
+            <td path=""  valign=top align=left  >
 
-        </td>
-      </tr></table>
+                <div id="file_view" class="code detail">
+                    <div id="file_name" class="s120 bold underline"></div>
+                    <div id="file_contents"></div>
+
+                </div>
+
+            </td>
+        </tr></table>
+
     </div>
 
+
+    
 
 
   </body>

@@ -23,7 +23,7 @@ if (!fs.existsSync('userdata')) fs.mkdir('userdata')
 _G.bookmark_ary = loadJson(_G.save_path　+ '/bookmark.json')
 if (!_G.bookmark_ary) _G.bookmark_ary = {}
 
-//ブックマークイベント
+//ブックマークイベント 削除 edit go
 $(document).on('click','.bm_del', function(e) {
 	console.log('bl_del' , e.target)
 	delete　_G.bookmark_ary[$(e.target).attr('bmkey')]
@@ -35,20 +35,50 @@ $(document).on('click','.bm_edit', function(e) {
 $(document).on('click','.bm_go', function(e) {
 	console.log('bm_go' , e.target)
 	setCurrentPath($(e.target).attr('bmkey'))
-
 })
+
+
+$(document).on('mouseover','.tFile', function(e) {
+  console.log('mouseOver ' , e.target)
+  var fname = $(e.target).text()
+  $('#file_name').html( fname )
+
+  if (fname.match(/(.png|.jpeg|.jpg|.gif)$/)){
+    $('#file_contents').html('<img src="' + _G.current_path + '/' + fname + '" />')
+
+    return 
+  }
+
+  osRunOut("cat '" + fname + "' | head -c 10000" , 'file_contents','replace' )
+})
+
+
+$(document).on('mouseover','.tDir', function(e) {
+  console.log('mouseOver ' , e.target)
+  $('#file_name').html( sBlue($(e.target).text()) )
+  osRunOut('ls ' + $(e.target).text() , 'file_contents','replace' )
+})
+
+
+
+
+$('#command_str').on('keyup',function(e){
+  if (e.which == 13){
+      osRunOut($(this).val(),'command_out','replace')
+  }
+})
+
 
 $('#filter_bookmark').on('keyup',function(e){
 
 	//enterなら候補1に移動  それ以外のキーなら再フィルタ
-    if (e.which ==13) {	
+  if (e.which ==13) {	
     	setCurrentPath($('span[bmlistnum=1]').attr('bmkey'))
-		toggleBookmarkList('up','')
+		  toggleBookmarkList('up','')
 	}else{
 		toggleBookmarkList('down',$('#filter_bookmark').val())
 	}
 })
-
 
 //ショートカット
 $(document).on('keydown', function(e) {
@@ -77,15 +107,18 @@ $(document).on('keydown', function(e) {
 
     if (e.which ==66 && e.metaKey) {  // com B    
 	    toggleBookmarkList('toggle','')
-	}
+	  }
     if (e.which ==70 && e.metaKey) {  // com F   
-		toggleFindgrep('toggle')
-	}
+		  toggleFindgrep('toggle')
+	  }
+
+    if (e.which ==27) {  // esc いろいろ開いてるもの閉じる
+      toggleBookmarkList('up','')
+      toggleFindgrep('up')
+    }
 
 
-    // if (e.which ==67 ) {  // C キーでchromeオープン
-    //   osrun('open -a "/Applications/Google Chrome.app"')
-    // }
+
 })
 
 

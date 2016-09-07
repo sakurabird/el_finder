@@ -77,11 +77,12 @@ toggleBookmarkList = function(updown , filter ){
   }
 
   //あとはdownの処理
+  var re1 = new RegExp( '(' + filter + ')', 'gi')
 
   //絞込
   var ary_out = []
   for (var ind in _G.bookmark_ary ) {
-      if (ind.match(filter) || _G.bookmark_ary[ind].match(filter)) {
+      if (ind.match(re1) || _G.bookmark_ary[ind].match(re1)) {
           ary_out[ind] = _G.bookmark_ary[ind]
       }
   }
@@ -93,8 +94,8 @@ toggleBookmarkList = function(updown , filter ){
     path_disp = ind
     name_disp = ary_out[ind]
     if (filter){
-        path_disp = path_disp.replace(filter,sRed(filter))
-        name_disp = name_disp.replace(filter,sRed(filter))
+        path_disp = path_disp.replace(re1,sRed('$1'))
+        name_disp = name_disp.replace(re1,sRed('$1'))
     }
 
     out += '<tr>' + 
@@ -103,9 +104,9 @@ toggleBookmarkList = function(updown , filter ){
         '</td><td>' + 
         sSilver(s80(path_disp)) + 
         '</td><td>' +
-        '<span class="bm_del btn" bmkey="'+ ary_out[ind] +'">del</span> '+
+        '<span class="bm_del btn" bmkey="'+ ind +'">del</span> '+
         '</td><td>' + 
-        '<span class="bl_edit btn" bmkey="' +  ary_out[ind] + '">edit</span>' + 
+        '<span class="bl_edit btn" bmkey="' +  ind + '">edit</span>' + 
         '</td></tr>'
 
     bm_list_num++
@@ -136,7 +137,7 @@ setCurrentPath = function(path){
     for (var ind in ary_path){
         if (ind == 0 ) continue
         c_path += "/" + ary_path[ind]
-        str_link += '<a href="javascript:setCurrentPath(\'' + c_path + '\')">' +   "/" +ary_path[ind]  + '</a>'
+        str_link += '<span class="link" onClick="setCurrentPath(\'' + c_path + '\')">' +   "/" +ary_path[ind]  + '</span>'
     }
     $('#current').html( str_link )
 
@@ -227,18 +228,20 @@ showFilelist = function(dir,filter){
 listDetail = function(shell,filter,files_ret,node_ct,ext_ct) {}
 listSimple = function(shell,filter,files_ret,node_ct,ext_ct) {
 
+  var re1 = new RegExp( '(' + filter + ')', 'gi')
+
   var filelist_outstr =""
   for (var ind in files_ret){
       var filename_disp = files_ret[ind].filename
-      if (filter) filename_disp = files_ret[ind].filename.replace(new RegExp( filter , 'gi'),sRed(filter))
+      if (filter) filename_disp = files_ret[ind].filename.replace(re1,sRed('$1'))
 
       if (files_ret[ind].stat.isDirectory()) {
-          filename_disp = '<a onClick="goDir(_G.current_path + \'' + '/' + files_ret[ind].filename + '\')" href="javascript:void(0);">' + sBold(sDodgerblue(filename_disp)) + '</a> ' +
+          filename_disp = '<a class="tDir" onClick="goDir(_G.current_path + \'' + '/' + files_ret[ind].filename + '\')" href="javascript:void(0);">' + sBold(sDodgerblue(filename_disp)) + '</a> ' +
                           sSilver(' + ')
       }
       var ext = ""
       if (files_ret[ind].stat.isFile()) {
-          filename_disp = filename_disp
+          filename_disp = '<span class="tFile">' +filename_disp + '</span>'
       }
       filelist_outstr += filename_disp + '<br/>'
   }
@@ -253,7 +256,7 @@ listThumb = function(shell,filter,files_ret,node_ct,ext_ct) {
   var filelist_outstr =""
   for (var ind in files_ret){
     var filename_disp = files_ret[ind].filename
-    if (filter) filename_disp = files_ret[ind].filename.replace(new RegExp( filter , 'gi'),sRed(filter))
+    if (filter) filename_disp = files_ret[ind].filename.replace(re1,sRed('$1'))
 
     if (files_ret[ind].stat.isDirectory()) {
 
