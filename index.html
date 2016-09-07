@@ -14,6 +14,8 @@
     .tLink { fonct-color:pink;}
     .crimson {color:crimson;}
 
+
+
     </style>
   </head>
   <body>
@@ -33,7 +35,7 @@
 
         <a onClick="termOpen(_G.current_path)" href="javascript:void(0)"><span class="crimson">Terminal</span></a>
         <a onClick="$('#shortcut').slideToggle(10)" href="javascript:void(0)"><span class="crimson">Shortcut</span></a>
-        <a onClick="$('#bookmark').slideToggle(10)" href="javascript:void(0)"><span class="crimson">Bookmark</span></a>
+        <a onClick="toggleBookmarkList('toggle','')" href="javascript:void(0)"><span class="crimson">Bookmark</span></a>
         <a onClick="$('#history').slideToggle(10)" href="javascript:void(0)"><span class="crimson">History</span></a>
 
         <div id="shortcut" style="display:none; margin:10px;" >
@@ -41,6 +43,8 @@
           Com UP : go upper directory <br/>
           Com N : create new file or directory <br/>
           Com B : toggle Bookmark <br/>
+          Com ← : back history 1 <br/>
+          Com ↑ : upper folder <br/>
         </div>
 
         <div id="bookmark" class="hide"></span>
@@ -59,29 +63,38 @@
     <a onClick="setBookmark(_G.current_path)" href="javascript:void(0)">bm</a>
     <a onClick="openFinder(_G.current_path)" href="javascript:void(0)">finder</a>
     <a onClick="setDirSize(_G.current_path)" href="javascript:void(0)">size</a><span id="dir_size" class="bold s150 gray"></span>
-    <br/>
-
 
     <span id="current_action" class="crimson">
-      <a onClick="$('#new_action').slideToggle(30)" href="javascript:void(0)">new</a>
+      <a onClick="toggleNew('toggle')" href="javascript:void(0)">new</a>
     </span>
-    <input id="filter" type="text" class="" size=15 placeholder="filter">
-    <input id="grep_filter" type="text" class="" size=15 placeholder="grep">
-    <span id="filter_shell" ></span>
-
+    <br/>
     <div id="new_action"  style="display:none;">
         <a id="new_file" onClick="makeFile('aaaa.txt' )" href="javascript:void(0);" class="s150">file </a>
         <a id="new_dir" onClick="makeDir( 'dir1' )" href="javascript:void(0);"  class="s150">folder</a>
     </div>
 
+    <div id="findgrep" class="hide">
+        <input id="filter" type="text" class="" size=15 placeholder="filter">
+        <input id="grep_filter" type="text" class="" size=15 placeholder="grep">
+    </div>
+    <span id="filter_shell" ></span>
+    <br/>
+    file<span id="file_count"></span>
+    dir<span id="dir_count"></span>
 
     <div style="margin-left:20px; margin-top:10px;">
 
-
-
         <table><tr>
-        <td id="files1" path="" width=50% valign=top >file1</td>
-        <td id="files2" path="" width=50% valign=top   >files/dirs in child dirs / depth 3</td>
+        <td id="file_list" path="" width=50% valign=top >
+
+
+
+        </td>
+        <td path="" width=50% valign=top   >
+          files/dirs in child dirs / depth 3
+          <div id="files_child"></div>
+
+        </td>
       </tr></table>
     </div>
 

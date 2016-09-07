@@ -14,15 +14,74 @@ setDirSize = function(){
     })
 }
 
+toggleFindgrep = function(updown){
+
+  if (!updown.match(/(up|down|toggle)/)) alert('updown not up or down')
+
+  if (updown == 'toggle' ){
+    if ($('#findgrep').css('display') == 'block')  updown = 'up'
+    else  updown = 'down'
+  }
+  if (updown == 'up'){
+      $('#findgrep').slideUp(10)
+      return
+  }
+
+  //あとはdown
+  $('#findgrep').slideDown(10)
+  $('#filter').focus() 
+}
+
+toggleNew = function(updown ){
+
+  if (!updown.match(/(up|down|toggle)/)) alert('updown not up or down')
+
+  if (updown == 'toggle' ){
+    if ($('#new_action').css('display') == 'block')  updown = 'up'
+    else  updown = 'down'
+  }
+  if (updown == 'up'){
+      $('#new_action').slideUp(10)
+      return
+  }
+
+  //あとdown
+  $('#new_action').slideDown(10)
+
+}
+
+
 //ブックマークを追加して、ファイルに保存
 setBookmark = function(path){
   path = path.replace(/\/\//,'/') // ルートからのフォルダ選択でスラッシュが重なる問題の対処
-  _G.bookmark_ary[path] = path
-  showBookmarkList()
+  _G.bookmark_ary[path] = path.replace(/(.*\/)(.*?)/,'$2')
+  toggleBookmarkList('down','')
   saveJson(_G.save_path　+ '/bookmark.json',_G.bookmark_ary)
 }
 
-showBookmarkList = function(){
+toggleBookmarkList = function(updown , filter ){
+
+  if (!updown.match(/(up|down|toggle)/)) alert('updown not up or down')
+
+  if (updown == 'toggle' ){
+    if ($('#bookmark').css('display') == 'block')  updown = 'up'
+    else  updown = 'down'
+  }
+  if (updown == 'up'){
+      $('#bookmark').slideUp(10)
+      return
+  }
+
+  //あとはdownの処理
+
+  //絞込
+  var ary = []
+  for (var ind in _G.bookmark_ary ) {
+
+
+  }
+
+  //表示
   var out ="<table>"
   for (var ind in _G.bookmark_ary ) {
     out += '<tr>' + 
@@ -37,12 +96,14 @@ showBookmarkList = function(){
         '</td></tr>'
   }
   $('#bookmark_list').html( out + '</table>' )
+  $('#bookmark').slideDown(10)
+  $('#filter_bookmark').focus()
 
 }
 
 setCurrentPath = function(path){
   path = path.replace(/\/\//,'/') // ルートからのフォルダ選択でスラッシュが重なる問題の対処
-  _G.history_ary[path] = path
+  _G.history_ary.push(path)
   setHistory()
   $('#filter').val('')
   $('#dir_size').html('')
@@ -101,9 +162,11 @@ termOpen = function(path){
 showFilelist = function(dir,filter){
   console.log(dir,filter)
 
+  //シェル文字列組み立て
   var shell = "ls -A '" + dir + "'"
   if (filter) shell += " | egrep -i '" + filter + "'"
 
+  //シェル実行
   osRunCb(shell,
     function(filelist_ary){
       var node_ct = { file:0, dir:0 };
@@ -119,6 +182,8 @@ showFilelist = function(dir,filter){
           if (files_ret[ind].stat.isDirectory()) {
               node_ct.dir++
           }
+
+          //拡張子統計
           files_ret[ind].ext = ""
           if (files_ret[ind].stat.isFile()) {
               node_ct.file++
@@ -133,16 +198,41 @@ showFilelist = function(dir,filter){
               }
           }
       }
+
+      //表示方法切り替え 画像サムネイル　シンプル ls-s (detail)
       //listThumb(shell,filter,files_ret,node_ct,ext_ct)
-      listInner(shell,filter,files_ret,node_ct,ext_ct)
-      listDetail(shell,filter,files_ret,node_ct,ext_ct)
+      //listInner(shell,filter,files_ret,node_ct,ext_ct)
+      //listDetail(shell,filter,files_ret,node_ct,ext_ct)
       listSimple(shell,filter,files_ret,node_ct,ext_ct)
     }
   )
 }
 
 listDetail = function(shell,filter,files_ret,node_ct,ext_ct) {}
-listSimple = function(shell,filter,files_ret,node_ct,ext_ct) {}
+listSimple = function(shell,filter,files_ret,node_ct,ext_ct) {
+
+  var filelist_outstr =""
+  for (var ind in files_ret){
+      var filename_disp = files_ret[ind].filename
+      if (filter) filename_disp = files_ret[ind].filename.replace(new RegExp( filter , 'gi'),sRed(filter))
+
+      if (files_ret[ind].stat.isDirectory()) {
+          filename_disp = '<a onClick="goDir(_G.current_path + \'' + '/' + files_ret[ind].filename + '\')" href="javascript:void(0);">' + sBold(sDodgerblue(filename_disp)) + '</a> ' +
+                          sSilver(' + ')
+      }
+      var ext = ""
+      if (files_ret[ind].stat.isFile()) {
+          filename_disp = filename_disp
+      }
+      filelist_outstr += filename_disp + '<br/>'
+  }
+
+  $('#filter_shell').html( sSilver(shell) + ' ' + sCrimson(files_ret.length))
+  $('#file_count').html(node_ct.file) 
+  $('#dir_count').html(node_ct.dir)
+
+  $('#file_list').html( filelist_outstr )
+}
 listThumb = function(shell,filter,files_ret,node_ct,ext_ct) {
   var filelist_outstr =""
   for (var ind in files_ret){
@@ -160,42 +250,48 @@ listThumb = function(shell,filter,files_ret,node_ct,ext_ct) {
   }
   console.log(ext_ct)
 
-  $('#filter_shell').html(
-      sSilver(shell) + " " + sCrimson(files_ret.length) +
-      sSilver(' file' + sGray(node_ct.file) + ' dir' + sGray(node_ct.dir)) + " ")
-  $('#files1').html( '<br/>' + filelist_outstr )
+  $('#filter_shell').html( sSilver(shell) + ' ' + sCrimson(files_ret.length))
+  $('#file_count').html(node_ct.file) 
+  $('#dir_count').html(node_ct.dir)
+
+  $('#file_list').html( filelist_outstr )
 }
 
+//中身も表示
 listInner = function(shell,filter,files_ret,node_ct,ext_ct) {
   var filelist_outstr =""
   for (var ind in files_ret){
-    var filename_disp = files_ret[ind].filename
-    if (filter) filename_disp = files_ret[ind].filename.replace(new RegExp( filter , 'gi'),sRed(filter))
+      var filename_disp = files_ret[ind].filename
+      if (filter) filename_disp = files_ret[ind].filename.replace(new RegExp( filter , 'gi'),sRed(filter))
 
-    if (files_ret[ind].stat.isDirectory()) {
-        filename_disp = '<a onClick="goDir(_G.current_path + \'' + '/' + files_ret[ind].filename + '\')" href="javascript:void(0);">' + sBold(sDodgerblue(filename_disp)) + '</a> ' +
-                        sSilver(' + ')
-    }
-    var ext = ""
-    if (files_ret[ind].stat.isFile()) {
-        filename_disp = filename_disp
-    }
+      if (files_ret[ind].stat.isDirectory()) {
+          filename_disp = '<a onClick="goDir(_G.current_path + \'' + '/' + files_ret[ind].filename + '\')" href="javascript:void(0);">' + sBold(sDodgerblue(filename_disp)) + '</a> ' +
+                          sSilver(' + ')
+      }
+      var ext = ""
+      if (files_ret[ind].stat.isFile()) {
+          filename_disp = filename_disp
+      }
 
-    filelist_outstr += filename_disp + '<br/>'
+      filelist_outstr += filename_disp + '<br/>'
 
-    if (files_ret[ind].stat.isFile()) {
-        if ( files_ret[ind].ext.match(/(jpg|jpeg|png|gif|tiff)/i) ) filelist_outstr += '<img  height=70 src="file://' + files_ret[ind].fullpath + '"/><br/>'
-        if ( files_ret[ind].ext.match(/(html|htm|js|coffee|php|rb|py|txt|xml|yaml|webloc|cpp|h|json|lua|plist|log|md)$/i)
-            || files_ret[ind].filename.substr(0,1) == "." ) {
-            var filetext = fs.readFileSync(files_ret[ind].fullpath,'utf-8').substr(0,500)
-            var htmlencoded = $('<div/>').text(filetext).html()
-            filelist_outstr += '<div style="margin-left:10px; margin-top:3px; font-size:70%;" >' + sSilver(htmlencoded) + '</div>'
-        }
-    }
+      //テキストや画像の中身も表示
+      if (files_ret[ind].stat.isFile()) {
+          if ( files_ret[ind].ext.match(/(jpg|jpeg|png|gif|tiff)/i) ) filelist_outstr += '<img  height=70 src="file://' + files_ret[ind].fullpath + '"/><br/>'
+          if ( files_ret[ind].ext.match(/(html|htm|js|coffee|php|rb|py|txt|xml|yaml|webloc|cpp|h|json|lua|plist|log|md)$/i)
+              || files_ret[ind].filename.substr(0,1) == "." ) {
+              var filetext = fs.readFileSync(files_ret[ind].fullpath,'utf-8').substr(0,500)
+              var htmlencoded = $('<div/>').text(filetext).html()
+              filelist_outstr += '<div style="margin-left:10px; margin-top:3px; font-size:70%;" >' + sSilver(htmlencoded) + '</div>'
+          }
+      }
   }
 
-  $('#filter_shell').html(
-      sSilver(shell) + " " + sCrimson(files_ret.length) +
-      sSilver(' file' + sGray(node_ct.file) + ' dir' + sGray(node_ct.dir)) + " ")
-  $('#files1').html( filelist_outstr )
+  $('#filter_shell').html( sSilver(shell) + ' ' + sCrimson(files_ret.length))
+  $('#file_count').html(node_ct.file) 
+  $('#dir_count').html(node_ct.dir)
+
+  $('#file_list').html( filelist_outstr )
 }
+
+
