@@ -62,11 +62,15 @@ setBookmark = function(path){
 toggleBookmarkList = function(updown , filter ){
 
   if (!updown.match(/(up|down|toggle)/)) alert('updown not up or down')
+  if (filter == undefined) alert('toggleBookmarkList filter undefined')
+
+  $('#filter_bookmark').val(filter)
 
   if (updown == 'toggle' ){
     if ($('#bookmark').css('display') == 'block')  updown = 'up'
     else  updown = 'down'
   }
+
   if (updown == 'up'){
       $('#bookmark').slideUp(10)
       return
@@ -75,26 +79,38 @@ toggleBookmarkList = function(updown , filter ){
   //あとはdownの処理
 
   //絞込
-  var ary = []
+  var ary_out = []
   for (var ind in _G.bookmark_ary ) {
-
-
+      if (ind.match(filter) || _G.bookmark_ary[ind].match(filter)) {
+          ary_out[ind] = _G.bookmark_ary[ind]
+      }
   }
 
   //表示
+  var bm_list_num = 1;
   var out ="<table>"
-  for (var ind in _G.bookmark_ary ) {
+  for (var ind in ary_out ) {
+    path_disp = ind
+    name_disp = ary_out[ind]
+    if (filter){
+        path_disp = path_disp.replace(filter,sRed(filter))
+        name_disp = name_disp.replace(filter,sRed(filter))
+    }
+
     out += '<tr>' + 
-        '<td><span class="bm_go btn" bmkey="'+ind+'">' +
-        _G.bookmark_ary[ind] + '</span> ' + 
+        '<td><span class="bm_go btn" bmlistnum="' + bm_list_num + '" bmkey="' + ind + '">' +
+        name_disp + '</span> ' + 
         '</td><td>' + 
-        sSilver(s80(ind)) + 
+        sSilver(s80(path_disp)) + 
         '</td><td>' +
-        '<span class="bm_del btn" bmkey="'+ind+'">del</span> '+
+        '<span class="bm_del btn" bmkey="'+ ary_out[ind] +'">del</span> '+
         '</td><td>' + 
-        '<span class="bl_edit btn" bmkey="' + ind + '">edit</span>' + 
+        '<span class="bl_edit btn" bmkey="' +  ary_out[ind] + '">edit</span>' + 
         '</td></tr>'
+
+    bm_list_num++
   }
+
   $('#bookmark_list').html( out + '</table>' )
   $('#bookmark').slideDown(10)
   $('#filter_bookmark').focus()

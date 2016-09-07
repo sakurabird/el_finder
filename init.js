@@ -27,7 +27,7 @@ if (!_G.bookmark_ary) _G.bookmark_ary = {}
 $(document).on('click','.bm_del', function(e) {
 	console.log('bl_del' , e.target)
 	delete　_G.bookmark_ary[$(e.target).attr('bmkey')]
-	showBookmarkList()
+	toggleBookmarkList('down','')
 })
 $(document).on('click','.bm_edit', function(e) {
 	console.log('bm_edit' , e.target)
@@ -38,9 +38,14 @@ $(document).on('click','.bm_go', function(e) {
 
 })
 
-$('#filter_bookmark').on('keydown',function(e){
+$('#filter_bookmark').on('keyup',function(e){
+
+	//enterなら候補1に移動  それ以外のキーなら再フィルタ
     if (e.which ==13) {	
-    //filterBookmark()
+    	setCurrentPath($('span[bmlistnum=1]').attr('bmkey'))
+		toggleBookmarkList('up','')
+	}else{
+		toggleBookmarkList('down',$('#filter_bookmark').val())
 	}
 })
 
