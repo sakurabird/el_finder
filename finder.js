@@ -1,5 +1,30 @@
 
 
+
+// 最初に人がよく使うフォルダやファイルを自動でbookmarkしておく
+setInitialBookmark = function(){
+  //file:  basiprofile etc/hosts  sudoer passwd
+  var files =[
+    '/etc/hosts' , '/etc/passwd' , '/etc/passwd' 
+  ]
+
+  for (var ind in files){
+    setBookmark(files[ind])
+  }
+  //folder:  user .ssh  var/log .trash  application
+  if (!fs.existsSync(path)) return false;
+
+
+  var dirs = [
+    '/var/log',
+  ]
+
+
+
+}
+
+
+
 setHistory=function(){
   var out =""
   for (var ind in _G.history_ary ) out += '<a href="javascript:void(0)" onClick="setCurrentPath(\'' + _G.history_ary[ind] + '\')">' +_G.history_ary[ind] + '</a><br/>'
@@ -53,7 +78,17 @@ toggleNew = function(updown ){
 
 //ブックマークを追加して、ファイルに保存
 setBookmark = function(path){
+  console.log('setBookmark ' + path)
+  if (!fs.existsSync(path)) {
+    alert(path + ' not exist')
+    return false;
+  }
   path = path.replace(/\/\//,'/') // ルートからのフォルダ選択でスラッシュが重なる問題の対処
+  
+  if ( _G.bookmark_ary[path] ){
+      console.log('登録済 更新' + path )
+  }
+
   _G.bookmark_ary[path] = path.replace(/(.*\/)(.*?)/,'$2')
   toggleBookmarkList('down','')
   saveJson(_G.save_path　+ '/bookmark.json',_G.bookmark_ary)
@@ -143,7 +178,21 @@ setCurrentPath = function(path){
 
     _G.current_path = c_path
     showFilelist(_G.current_path,$('#filter').val())
+
+    //ファイル内容ペーン消す
+    $('#file_name').html('')
+    $('#file_contents').html('')
+    //ファイルならディティール表示
+    showFile(_G.current_path)
+
+
     $("#filter").focus()
+
+}
+
+showFile = function(path){
+  $('#file_name').html( sBlue(path) )
+  osRunOut('ls ' + path , 'file_contents','replace' )
 
 }
 

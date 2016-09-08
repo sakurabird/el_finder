@@ -23,6 +23,10 @@ if (!fs.existsSync('userdata')) fs.mkdir('userdata')
 _G.bookmark_ary = loadJson(_G.save_path　+ '/bookmark.json')
 if (!_G.bookmark_ary) _G.bookmark_ary = {}
 
+setInitialBookmark()
+
+
+
 //ブックマークイベント 削除 edit go
 $(document).on('click','.bm_del', function(e) {
 	console.log('bl_del' , e.target)
