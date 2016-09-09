@@ -7,19 +7,13 @@ _G.current_path = ""
 _G.history_ary = []
 _G.bookmark_ary = {}
 
-exec("whoami",execOption,(error, stdout, stderr) => {
-    _G.username = stdout.trim()
-    $('#username').html(_G.username)
-})
-exec("echo $HOME",execOption,(error, stdout, stderr) => {
-    _G.userhome_path = stdout.trim()
-    _G.current_path = _G.userhome_path
-    goDir(_G.current_path)
-})
+_G.username = process.env.USER
+_G.current_path = _G.userhome_path = process.env.HOME
+
+goDir(_G.current_path)
 
 //保存ファイル読み込み
 if (!fs.existsSync('userdata')) fs.mkdir('userdata')
-
 _G.bookmark_ary = loadJson(_G.save_path　+ '/bookmark.json')
 if (!_G.bookmark_ary) _G.bookmark_ary = {}
 
@@ -64,14 +58,11 @@ $(document).on('mouseover','.tDir', function(e) {
 })
 
 
-
-
 $('#command_str').on('keyup',function(e){
   if (e.which == 13){
       osRunOut($(this).val(),'command_out','replace')
   }
 })
-
 
 $('#filter_bookmark').on('keyup',function(e){
 

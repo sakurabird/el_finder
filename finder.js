@@ -5,7 +5,19 @@
 setInitialBookmark = function(){
   //file:  basiprofile etc/hosts  sudoer passwd
   var files =[
-    '/etc/hosts' , '/etc/passwd' , '/etc/passwd' 
+    '/etc/hosts' , '/etc/passwd' , '/etc/sudoers' ,
+
+    '/var/log','/etc',
+    '/Applications' , 
+    '/Applications/utilities' , 
+    '/Applications/iTunes.app' ,
+    '/Volumes' , 
+    '/var/spool/cron' ,
+
+    '/Users/' + _G.username ,
+    '/Users/' + _G.username + '/Downloads',
+    '/Users/' + _G.username + '/.Trash',
+    '/Users/' + _G.username + '/.bash_profile'
   ]
 
   for (var ind in files){
@@ -15,9 +27,6 @@ setInitialBookmark = function(){
   if (!fs.existsSync(path)) return false;
 
 
-  var dirs = [
-    '/var/log',
-  ]
 
 
 
