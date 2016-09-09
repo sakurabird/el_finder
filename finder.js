@@ -12,7 +12,7 @@ setInitialBookmark = function(){
     '/Applications/utilities' , 
     '/Applications/iTunes.app' ,
     '/Volumes' , 
-    '/var/spool/cron' ,
+ //   '/var/spool/cron' ,
 
     '/Users/' + _G.username ,
     '/Users/' + _G.username + '/Downloads',
@@ -26,17 +26,13 @@ setInitialBookmark = function(){
   //folder:  user .ssh  var/log .trash  application
   if (!fs.existsSync(path)) return false;
 
-
-
-
-
 }
 
 
 
 setHistory=function(){
   var out =""
-  for (var ind in _G.history_ary ) out += '<a href="javascript:void(0)" onClick="setCurrentPath(\'' + _G.history_ary[ind] + '\')">' +_G.history_ary[ind] + '</a><br/>'
+  for (var ind in _G.history_ary ) out += '<a href="javascript:void(0)" onClick="setCurrentPath(\'' + _G.history_ary[ind].path + '\')">' +_G.history_ary[ind].path + '</a><br/>'
   $('#history_list').html( out)
 
 }
@@ -92,8 +88,7 @@ setBookmark = function(path){
     alert(path + ' not exist')
     return false;
   }
-  path = path.replace(/\/\//,'/') // ルートからのフォルダ選択でスラッシュが重なる問題の対処
-  
+
   if ( _G.bookmark_ary[path] ){
       console.log('登録済 更新' + path )
   }
@@ -134,6 +129,7 @@ toggleBookmarkList = function(updown , filter ){
   //表示
   var bm_list_num = 1;
   var out ="<table>"
+
   for (var ind in ary_out ) {
     path_disp = ind
     name_disp = ary_out[ind]
@@ -162,9 +158,51 @@ toggleBookmarkList = function(updown , filter ){
 
 }
 
+
+ary2html = function(jsonAry, jsonProperty){
+
+  // jsonAry jsonを配列でリストにしたもの
+  // jsonProperty  {attr={ } class=""}
+
+  if (!jsonAry) return ""
+
+  var ret = "<table>\n"
+  for (var ind in jsonAry){
+
+      var row = jsonAry[ind]
+
+      //タイトル行
+      if (ind == 0){
+          ret += "  <tr>"
+          for (var title in row){
+              ret += '<th align=left >' + title + "</th>"
+          }
+      }
+      ret +="</tr>\n"
+
+      //値の行
+      ret += "  <tr>"
+      for (var colname in row){
+          ret += '<td>' + row[colname] + "</td>"
+      }
+      ret +="</tr>\n"
+  }
+  ret += "</table>"
+  return ret
+}
+
+$('#debug').html(ary2html(
+  [
+    { "id":1 , "name":"john" , "age":2 },
+    { "id":3 , "name":"jennifer" , "age":4 },
+    { "id":4 , "name":"michael" , "age":7 }
+  ])
+)
+
 setCurrentPath = function(path){
-  path = path.replace(/\/\//,'/') // ルートからのフォルダ選択でスラッシュが重なる問題の対処
-  _G.history_ary.push(path)
+  //path = path.replace(/\/\//,'/') // ルートからのフォルダ選択でスラッシュが重なる問題の対処
+
+  _G.history_ary.push({"path":path})
   setHistory()
   $('#filter').val('')
   $('#dir_size').html('')
@@ -184,6 +222,8 @@ setCurrentPath = function(path){
         str_link += '<span class="link" onClick="setCurrentPath(\'' + c_path + '\')">' +   "/" +ary_path[ind]  + '</span>'
     }
     $('#current').html( str_link )
+
+// convert path 2 folr
 
     _G.current_path = c_path
     showFilelist(_G.current_path,$('#filter').val())
