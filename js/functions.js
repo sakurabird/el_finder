@@ -48,10 +48,6 @@ sSilver= function(str){ return '<span style="color:silver;">' + str + '</span>'}
 
 sBold= function(str){ return '<span style="font-weight:bold;">' + str + '</span>'}
 
-path2file = function(full_path){ return full_path.replace(/\..*?$/,'').replace(/.*\//,'') } // 後ろの.gitと 直前のスラッシュまでを除去
-path2pjname =function(full_path){ return full_path.replace(/\/.git/,'').replace(/.*\//,'') } // 後ろの.gitと 直前のスラッシュまでを除去
-path2dir =function(full_path){ return full_path.replace(/\/.git/,'') }
-
 url2link = function(line ){ return line.replace(/(http.*?) /, '<span onClick="osrun(\'open $1\')" class="btn">$1</span> ')}
 
 escapeHTML = function(html) { return $('<div>').text(html).html() }
@@ -82,7 +78,7 @@ saveText = function (path,text){
 
 // json をテキスト保存  [] でなく {} で初期化すること
 saveJson = function(path,jsondata){
-  console.log("save " + path)
+  console.log("saveJson path=" + path)
   fs.writeFileSync(path, JSON.stringify(jsondata))
 }
 
@@ -97,7 +93,7 @@ loadJson = function(path){
 }
 
 //osコマンド非同期実行 結果出力不要のとき
-osrun = function(command , out_html_id){
+osRun = function(command ){
   console.log(command)
   _G.commandlog.push(command)
 
@@ -178,4 +174,36 @@ diffColor = function (ary){
        if (line[0]=='+') ary[ind] = sGreen(line)
     }
     return ary
+}
+
+ary2html = function(jsonAry, jsonProperty){
+
+  // jsonAry jsonを配列でリストにしたもの
+  // jsonProperty  {attr={ } class=""}
+
+  if (!jsonProperty) jsonProperty = {}
+
+  if (!jsonAry) return ""
+
+  var ret = "<table>\n"
+  for (var ind in jsonAry){
+
+      var row = jsonAry[ind]
+      //タイトル行
+      if (ind == 0){
+          ret += "  <tr>"
+          for (var title in row){
+              ret += '<th align=left >' + title + "</th>"
+          }
+      }
+      ret +="</tr>\n"
+      //値の行
+      ret += "  <tr>"
+      for (var colname in row){
+          ret += '<td>' + row[colname] + "</td>"
+      }
+      ret +="</tr>\n"
+  }
+  ret += "</table>"
+  return ret
 }
