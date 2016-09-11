@@ -39,6 +39,8 @@
 
         <a onClick="$('#shortcut').slideToggle(10)" href="javascript:void(0)"><span class="crimson">Shortcut</span></a>
 
+        <a onClick="osRunOut('rm ' + _G.save_path + '/*','debug','replace'); " href="javascript:void(0)"><span class="crimson">DelCache</span></a>
+
         <div id="shortcut" style="display:none; margin:10px;" >
           <!--Com H : go home directory <br/>  com h は appli をhide -->
           Com UP : go upper directory <br/>
@@ -97,25 +99,25 @@
         file<span id="file_count"></span>
         dir<span id="dir_count"></span>
 
-        <div style="margin-left:20px; margin-top:10px;">
-            <table><tr>
-                <td id="file_list" path="" valign=top nowrap >
 
-                </td>
-                <td path=""  valign=top align=left  >
 
-                    <div id="file_view" class="code detail">
-                        <span id="file_name" class="s120 bold underline"></span>
-                        <span onClick="osRun('open -t ' + $('#file_name').text())" class="btn">edit</span>
-                        <div id="file_contents"></div>
+        <table style="margin-top:10px;"><tr>
+            <td id="file_list" path="" valign=top nowrap >
 
-                    </div>
-                    <div id="debug"></div>
+            </td>
+            <td path=""  valign=top align=left  >
 
-                </td>
-            </tr></table>
+                <div id="file_view" class="code detail">
+                    <span id="file_name" class="s120 bold underline"></span>
+                    <span onClick="osRun('open -t ' + $('#file_name').text())" class="btn">edit</span>
+                    <div id="file_contents"></div>
 
-        </div>
+                </div>
+                <div id="debug"></div>
+
+            </td>
+        </tr></table>
+
     </div> <!-- mainwin -->
 
   </body>
