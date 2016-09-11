@@ -68,7 +68,7 @@ setCurrentPath = function(path){
 }
 
 clearFileContents = function(){
-    //ファイル内容ペーン消す
+    //ファイル内容ページ消す
     $('#file_name').html('')
     $('#file_contents').html('')
 
@@ -79,7 +79,7 @@ showFileContents = function(fname){
     console.log('showFileContents fname',fname)
     if (fname == undefined || fname =="") alert('showFileContents fname ' + fname)
 
-    //ファイル内容ペーン消す
+    //ファイル内容ページ消す
     $('#file_name').html('')
     $('#file_contents').html('')
 
